@@ -5,6 +5,9 @@ SECONDS=0
 repo_root="$(cd "$(dirname "$0")/../.." && pwd)"
 render_dir=""
 format="svg"
+background="${MERMAID_BACKGROUND:-}"
+# Use latest mermaid-cli by default; override via --cli-version or MERMAID_CLI_VERSION
+cli_version="${MERMAID_CLI_VERSION:-}"
 paths=()
 
 while (( "$#" )); do
@@ -14,6 +17,12 @@ while (( "$#" )); do
       shift 2 ;;
     --format)
       format="${2:-svg}"
+      shift 2 ;;
+    --background)
+      background="${2:-}"
+      shift 2 ;;
+    --cli-version)
+      cli_version="${2:-}"
       shift 2 ;;
     --help|-h)
       cat <<EOF
@@ -62,7 +71,11 @@ fi
 # Choose runner
 MMDC=""
 if command -v npx >/dev/null 2>&1; then
-  MMDC="npx -y @mermaid-js/mermaid-cli"
+  if [[ -n "$cli_version" ]]; then
+    MMDC="npx -y @mermaid-js/mermaid-cli@${cli_version}"
+  else
+    MMDC="npx -y @mermaid-js/mermaid-cli"
+  fi
 elif command -v docker >/dev/null 2>&1; then
   MMDC="docker run --rm -u $(id -u):$(id -g) -v $PWD:/data minlag/mermaid-cli"
 else
@@ -74,7 +87,7 @@ ok=0; fail=0; total=0
 out_dir="${render_dir:-$tmp_dir}"
 mkdir -p "$out_dir"
 
-echo "Mermaid validate: runner=${MMDC%% *}; format=$format; out=${render_dir:-(temp)}"
+echo "Mermaid validate: runner=${MMDC%% *}; format=$format; out=${render_dir:-(temp)}${cli_version:+; cli=${cli_version}}"
 
 for f in "${files[@]}"; do
   [[ -f "$f" ]] || continue
@@ -83,9 +96,17 @@ for f in "${files[@]}"; do
   out="$out_dir/${base%.*}.$format"
   set +e
   if [[ "$MMDC" == docker* ]]; then
-    $MMDC -i "/data/${f#./}" -o "/data/${out#./}" -e "$format" >/dev/null 2>&1
+    if [[ -n "$background" ]]; then
+      $MMDC -i "/data/${f#./}" -o "/data/${out#./}" -e "$format" -b "$background" >/dev/null 2>&1
+    else
+      $MMDC -i "/data/${f#./}" -o "/data/${out#./}" -e "$format" >/dev/null 2>&1
+    fi
   else
-    $MMDC -i "$f" -o "$out" -e "$format" >/dev/null 2>&1
+    if [[ -n "$background" ]]; then
+      $MMDC -i "$f" -o "$out" -e "$format" -b "$background" >/dev/null 2>&1
+    else
+      $MMDC -i "$f" -o "$out" -e "$format" >/dev/null 2>&1
+    fi
   fi
   status=$?
   set -e
