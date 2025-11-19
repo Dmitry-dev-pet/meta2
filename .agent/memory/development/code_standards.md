@@ -1,3 +1,9 @@
+---
+level: c4
+tags: [development, standards, patterns]
+last_updated: 2025-11-19
+---
+
 # Code Standards (C4)
 
 ## Coding Patterns

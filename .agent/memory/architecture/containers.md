@@ -1,3 +1,9 @@
+---
+level: c2
+tags: [architecture, containers, high-level]
+last_updated: 2025-11-19
+---
+
 # Containers (C2)
 
 ## High-Level Architecture

@@ -1,3 +1,9 @@
+---
+level: development
+tags: [automation, droids, workflows]
+last_updated: 2025-11-19
+---
+
 # Automation
 
 ## Droid System

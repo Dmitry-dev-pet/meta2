@@ -1,3 +1,9 @@
+---
+level: development
+tags: [tech-stack, technologies]
+last_updated: 2025-11-19
+---
+
 # Технологический Стек
 
 ## Ядро

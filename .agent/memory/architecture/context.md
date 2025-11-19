@@ -1,3 +1,9 @@
+---
+level: c1
+tags: [architecture, context, external-systems]
+last_updated: 2025-11-19
+---
+
 # System Context (C1)
 
 ## Система

@@ -1,3 +1,9 @@
+---
+level: c3
+tags: [architecture, components, services]
+last_updated: 2025-11-19
+---
+
 # Components (C3)
 
 ## Layered Architecture
