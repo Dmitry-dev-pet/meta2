@@ -1,0 +1,11 @@
+repos:
+  - repo: local
+    hooks:
+      - id: mermaid-validate
+        name: Mermaid diagrams validate (mmd/md)
+        language: system
+        # Validate each staged Mermaid/Markdown file by attempting render to SVG
+        entry: bash -lc 'status=0; for f in "$@"; do npx -y @mermaid-js/mermaid-cli -i "$f" -o /tmp/mermaid-validate.svg -e svg >/dev/null 2>&1 || status=1; done; exit $status'
+        files: '\\.(mmd|md)$'
+        pass_filenames: true
+        stages: [commit]

@@ -1,0 +1,27 @@
+# Environment files
+.env
+secret.json
+git_token.txt
+
+# Directories
+.claude/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Logs
+logs/
+
+# Database
+*.db
+*.sqlite3
+
+# Backup files
+backups/
+database_statistics_*.json
+github_duplicates_report.json

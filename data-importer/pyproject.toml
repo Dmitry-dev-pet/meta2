@@ -1,0 +1,82 @@
+[project]
+name = "data-importer"
+version = "0.1.0"
+description = "FastAPI data-importer service with Google Sheets integration"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+dependencies = [
+    "fastapi[standard]>=0.121.1",
+    "uvicorn>=0.38.0",
+    "sqlalchemy>=2.0.44",
+    "aiosqlite>=0.21.0",
+    "asyncpg>=0.30.0",
+    "alembic>=1.17.1",
+    "pydantic>=2.12.4",
+    "pydantic-settings>=2.12.0",
+    "google-api-python-client>=2.187.0",
+    "google-auth-httplib2>=0.2.1",
+    "google-auth-oauthlib>=1.2.3",
+    "httpx>=0.28.1",
+    "python-multipart>=0.0.20",
+    "python-jose>=3.5.0",
+    "passlib>=1.7.4",
+    "structlog>=25.5.0",
+    "prometheus-client>=0.23.1",
+    "greenlet>=3.2.4",
+]
+readme = "README.md"
+requires-python = ">= 3.13"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Framework :: FastAPI",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+
+[project.scripts]
+"data-importer" = "data_importer:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "pytest>=9.0.1",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.0.0",
+    "black>=25.11.0",
+    "ruff>=0.14.4",
+    "mypy>=1.18.2",
+    "pre-commit>=4.4.0",
+    "vulture>=2.14",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/data_importer"]
+
+[tool.mypy]
+python_version = "3.13"
+mypy_path = ["src"]
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+show_error_codes = true
+pretty = true
+plugins = ["pydantic.mypy"]
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+warn_untyped_fields = true
