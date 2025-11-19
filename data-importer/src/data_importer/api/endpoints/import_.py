@@ -290,33 +290,24 @@ async def dry_run_import() -> Dict[str, Any]:
 
 
 async def run_import_background(import_id: str) -> None:
-    """Simulate background import stages and mark completion.
-
-    This placeholder avoids external network calls for testing.
-    """
+    """Run actual data import in background."""
     try:
-        import asyncio
-
         # Fetching stage
         background_imports[import_id]["status"] = "fetching_data"
-        background_imports[import_id]["message"] = "Fetching data from sources"
-        await asyncio.sleep(0.5)
+        background_imports[import_id]["message"] = "Fetching data from Google Sheets"
 
-        # Processing stage
-        background_imports[import_id]["status"] = "processing"
-        background_imports[import_id]["message"] = "Processing and validating data"
-        await asyncio.sleep(0.5)
-
-        # Importing stage
-        background_imports[import_id]["status"] = "importing"
-        background_imports[import_id]["message"] = "Writing data to database"
-        await asyncio.sleep(0.5)
+        # Run real import
+        logger.info("Starting real import", import_id=import_id)
+        result = await import_service.run_full_import()
 
         # Completed
         background_imports[import_id]["status"] = "completed"
         background_imports[import_id]["message"] = "Import finished successfully"
-        background_imports[import_id]["progress"] = {"imported": True}
+        background_imports[import_id]["progress"] = result
+
+        logger.info("Import completed successfully", import_id=import_id, result=result)
 
     except Exception as e:
         background_imports[import_id]["status"] = "failed"
         background_imports[import_id]["message"] = f"Import failed: {e}"
+        logger.error("Import failed", import_id=import_id, error=str(e))
