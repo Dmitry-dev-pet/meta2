@@ -85,13 +85,7 @@ class ImportService:
         """
         logger.info("Starting database import")
 
-        import_stats = {
-            "students": {"created": 0, "errors": 0},
-            "mentors": {"created": 0, "errors": 0},
-            "projects": {"created": 0, "linking_errors": 0},
-            "reviews": {"created": 0, "linking_errors": 0},
-            "sponsored_reviews": {"created": 0, "linking_errors": 0},
-        }
+        import_stats = self._initialize_import_stats()
 
         # Get database adapter
         from ..config.database import get_database_adapter
@@ -103,67 +97,8 @@ class ImportService:
                 # Clear existing data (Full Replace strategy)
                 await self._clear_database(session)
 
-                # Create mappings for linking
-                github_to_user_id: Dict[str, int] = {}
-                telegram_to_user_id: Dict[str, int] = {}
-
-                # Import users (students + mentors)
-                await self._import_users(
-                    session,
-                    processed_data["students"],
-                    "STUDENT",
-                    github_to_user_id,
-                    telegram_to_user_id,
-                    import_stats,
-                )
-                await self._import_users(
-                    session,
-                    processed_data["mentors"],
-                    "MENTOR",
-                    github_to_user_id,
-                    telegram_to_user_id,
-                    import_stats,
-                )
-
-                # Import mentor profiles
-                await self._import_mentor_profiles(
-                    session,
-                    processed_data["mentors"],
-                    telegram_to_user_id,
-                    import_stats,
-                )
-
-                # Import projects
-                project_name_to_id: Dict[str, int] = {}
-                await self._import_projects(
-                    session,
-                    processed_data["projects"],
-                    github_to_user_id,
-                    project_name_to_id,
-                    import_stats,
-                )
-
-                # Import reviews
-                await self._import_reviews(
-                    session,
-                    processed_data["reviews"],
-                    project_name_to_id,
-                    telegram_to_user_id,
-                    import_stats,
-                )
-
-                # Import sponsored reviews if enabled
-                if (
-                    settings.enable_financial_import
-                    and "sponsored_reviews" in processed_data
-                ):
-                    await self._import_sponsored_reviews(
-                        session,
-                        processed_data["sponsored_reviews"],
-                        project_name_to_id,
-                        telegram_to_user_id,
-                        import_stats,
-                    )
+                # Import all entities
+                await self._import_all_entities(session, processed_data, import_stats)
 
                 # Commit transaction
                 await session.commit()
@@ -179,6 +114,89 @@ class ImportService:
                     "Database import failed, transaction rolled back", error=str(e)
                 )
                 raise
+
+    def _initialize_import_stats(self) -> Dict[str, Any]:
+        """Initialize import statistics structure."""
+        return {
+            "students": {"created": 0, "errors": 0},
+            "mentors": {"created": 0, "errors": 0},
+            "projects": {"created": 0, "linking_errors": 0},
+            "reviews": {"created": 0, "linking_errors": 0},
+            "sponsored_reviews": {"created": 0, "linking_errors": 0},
+        }
+
+    async def _import_all_entities(
+        self,
+        session: AsyncSession,
+        processed_data: Dict[str, List[Dict[str, Any]]],
+        import_stats: Dict[str, Any],
+    ) -> None:
+        """
+        Import all entities in correct order.
+
+        Args:
+            session: Database session
+            processed_data: Processed data from data processor
+            import_stats: Statistics to update
+        """
+        # Create mappings for linking
+        github_to_user_id: Dict[str, int] = {}
+        telegram_to_user_id: Dict[str, int] = {}
+
+        # Import users (students + mentors)
+        await self._import_users(
+            session,
+            processed_data["students"],
+            "STUDENT",
+            github_to_user_id,
+            telegram_to_user_id,
+            import_stats,
+        )
+        await self._import_users(
+            session,
+            processed_data["mentors"],
+            "MENTOR",
+            github_to_user_id,
+            telegram_to_user_id,
+            import_stats,
+        )
+
+        # Import mentor profiles
+        await self._import_mentor_profiles(
+            session,
+            processed_data["mentors"],
+            telegram_to_user_id,
+            import_stats,
+        )
+
+        # Import projects
+        project_name_to_id: Dict[str, int] = {}
+        await self._import_projects(
+            session,
+            processed_data["projects"],
+            github_to_user_id,
+            project_name_to_id,
+            import_stats,
+        )
+
+        # Import reviews
+        await self._import_reviews(
+            session,
+            processed_data["reviews"],
+            project_name_to_id,
+            telegram_to_user_id,
+            import_stats,
+        )
+
+        # Import sponsored reviews if enabled
+        if settings.enable_financial_import and "sponsored_reviews" in processed_data:
+            await self._import_sponsored_reviews(
+                session,
+                processed_data["sponsored_reviews"],
+                project_name_to_id,
+                telegram_to_user_id,
+                import_stats,
+            )
 
     async def _clear_database(self, session: AsyncSession) -> None:
         """Clear existing data in correct order, checking table existence first."""
