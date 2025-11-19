@@ -1,7 +1,8 @@
 ---
 level: development
-tags: [steering, decision-making, ai-agents]
+tags: [scripts, commands, quick-reference, testing]
 last_updated: 2025-11-19
+version: 1.1
 ---
 
 # Steering Guide
@@ -14,9 +15,15 @@ last_updated: 2025-11-19
 **If**: Внесение изменений в код
 **Then**: 
 1. Сначала запустить `ruff-fix`, `black-format`, `typecheck`
-2. Коммитить через `commit-droid.sh`
+2. **ОБЯЗАТЕЛЬНО**: Протестировать изменения (dry-run или unit tests)
+3. Коммитить через `commit-droid.sh`
 
-**Rationale**: Проверки обязательны перед коммитом (стандарты верификации).
+**Rationale**: Проверки обязательны перед коммитом. Тестирование гарантирует, что рефакторинг не сломал функциональность.
+
+**Testing Checklist**:
+- [ ] Статические проверки (ruff, black, mypy) ✓
+- [ ] Функциональное тестирование (dry-run import) ✓
+- [ ] Unit tests (если добавлена новая логика) ✓
 
 ### Creating Pull Request
 **If**: Нужно создать PR
@@ -101,16 +108,21 @@ raise Exception("Error")  # BAD
 1. [ ] Document в `architecture/features/`
 2. [ ] Update `components.md` if new component
 3. [ ] Implement code
-4. [ ] Add tests
-5. [ ] Update `project_status.md`
-6. [ ] Run verification droids
-7. [ ] Create PR via `pr-create.sh`
+4. [ ] Add unit tests
+5. [ ] **Test changes** (dry-run import)
+6. [ ] Update `project_status.md`
+7. [ ] Run verification droids (ruff, black, mypy)
+8. [ ] **Re-test after droids** (убедиться что форматирование не сломало код)
+9. [ ] Create PR via `pr-create.sh`
 
 ### Refactoring Strategy
 1. **Document current state** (код + тесты)
-2. **Plan changes** (design doc)
-3. **Refactor incrementally** (small commits)
-4. **Verify each step** (тесты не ломаются)
+2. **Test BEFORE refactoring** (baseline: dry-run должен проходить)
+3. **Plan changes** (design doc)
+4. **Refactor incrementally** (small commits)
+5. **Test AFTER each change** (dry-run или unit tests)
+6. **Verify with droids** (ruff, black, mypy)
+7. **Final test** (убедиться что все работает)
 
 ## Memory Bank Updates
 

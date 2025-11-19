@@ -31,6 +31,25 @@ kill -9 <PID>
 
 ## Import Operations
 
+### Quick test after code changes
+```bash
+# 1. Start dev server (if not running)
+cd /Users/dmitry/Project/meta2/data-importer
+rye run uvicorn src.data_importer.main:app --reload &
+
+# 2. Wait for startup
+sleep 3
+
+# 3. Run dry-run test
+curl -X POST "http://localhost:8000/api/v1/import/dry-run" \
+  -H "Content-Type: application/json" | jq .
+
+# 4. Check statistics
+# Expected: students=544, projects=1222, reviews=593
+```
+
+**IMPORTANT**: Запускайте этот тест ПОСЛЕ каждого рефакторинга!
+
 ### Dry-run import
 ```bash
 curl -X POST "http://localhost:8000/api/v1/import/dry-run" \
