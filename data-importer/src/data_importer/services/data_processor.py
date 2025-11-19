@@ -13,6 +13,7 @@ from ..utils.validation import (
     validate_row_length,
     clean_and_validate,
 )
+from ..validation import ValidationRules
 from structlog import get_logger
 
 logger = get_logger(__name__)
@@ -115,15 +116,8 @@ class DataProcessor:
             if not validate_row_length(row, 1, "student"):
                 continue
 
-            # Define field validators
-            field_validators = {
-                "github_url": (0, normalize_github_url),
-                "telegram_user_id": (
-                    1,
-                    lambda x: int(x) if x and x.isdigit() else None,
-                ),
-                "telegram_username": (2, normalize_telegram_username),
-            }
+            # Use centralized validation rules
+            field_validators = ValidationRules.student_fields()
 
             # Clean and validate data
             student_data = clean_and_validate(row, field_validators)
@@ -159,31 +153,8 @@ class DataProcessor:
             if not validate_row_length(row, 4, "mentor"):
                 continue
 
-            # Define field validators for mentors (A-H columns)
-            field_validators = {
-                "github_url": (0, normalize_github_url),  # Column A: GitHub URL
-                "full_name": (
-                    2,
-                    lambda x: x.strip() if x else "",
-                ),  # Column C: Full Name (Column B contains sequence numbers, not telegram_user_id)
-                "telegram_username": (
-                    3,
-                    normalize_telegram_username,
-                ),  # Column D: Telegram Username
-                "languages": (
-                    4,
-                    lambda x: x.strip() if x else "",
-                ),  # Column E: Languages
-                "services": (5, lambda x: x.strip() if x else ""),  # Column F: Services
-                "price_type": (
-                    6,
-                    lambda x: x.strip() if x else "",
-                ),  # Column G: Price Type
-                "website_url": (
-                    7,
-                    lambda x: x.strip() if x else "",
-                ),  # Column H: Website URL
-            }
+            # Use centralized validation rules
+            field_validators = ValidationRules.mentor_fields()
 
             # Clean and validate data
             mentor_data = clean_and_validate(row, field_validators)
